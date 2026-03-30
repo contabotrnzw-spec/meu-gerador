@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENSI_PRO_GENERATOR_V2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        body {
+            background-color: #000;
+            color: #00ff00; /* Verde estilo Matrix/Hacker */
+            font-family: 'Courier Prime', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background-color: rgba(0, 10, 0, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        h2 { text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #00ff00; padding-bottom: 10px; }
+
+        input, select {
+            width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #00ff00;
+            background: #000; color: #00ff00; outline: none; font-family: 'Courier Prime';
+        }
+
+        .btn {
+            width: 100%; padding: 15px; background: #00ff00; border: none;
+            color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* O BOTÃO INVISÍVEL */
+        .secret-trigger {
+            width: 100%; height: 20px; background: transparent; border: none;
+            cursor: default; margin-top: 5px; outline: none;
+        }
+
+        /* ÁREAS OCULTAS */
+        #admin-panel, #sensi-result { display: none; margin-top: 20px; border-top: 1px dashed #00ff00; padding-top: 20px; }
+
+        .key-display { background: #111; padding: 10px; border: 1px solid #fff; color: #fff; margin-top: 10px; word-break: break-all; font-size: 0.8em; }
+        
+        .sensi-box { color: #00ffff; font-weight: bold; font-size: 1.2em; margin: 15px 0; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="login-screen">
+            <h2>SENSI GENERATOR</h2>
+            <p style="font-size: 0.8em;">INSIRA SUA KEY DE ACESSO:</p>
+            <input type="text" id="user-key" placeholder="CHAVE DE ACESSO">
+            <button class="btn" onclick="verificarAcesso()">[ ENTRAR NO SISTEMA ]</button>
+            
+            <button class="secret-trigger" onclick="entrarModoAdmin()"></button>
+        </div>
+
+        <div id="sensi-result">
+            <h3>PAINEL VIP ATIVO</h3>
+            <div class="sensi-box" id="display-sensi">
+                GERAL: --<br>RED DOT: --<br>MIRA 2X: --<br>MIRA 4X: --<br>DPI: --
+            </div>
+            <button class="btn" style="background:#00ffff" onclick="gerarNovaSensi()">[ GERAR SENSI AGORA ]</button>
+        </div>
+
+        <div id="admin-panel">
+            <h3 style="color: #fff;">GERADOR DE KEYS</h3>
+            <select id="key-time">
+                <option value="1">1 DIA</option>
+                <option value="7">7 DIAS</option>
+                <option value="30">30 DIAS</option>
+                <option value="999">PERMANENTE</option>
+            </select>
+            <button class="btn" style="background:#fff" onclick="criarNovaKey()">[ CRIAR KEY ]</button>
+            <div id="show-new-key" class="key-display" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- SISTEMA DE ADMIN INVISÍVEL ---
+        function entrarModoAdmin() {
+            let pass = prompt("SISTEMA BLOQUEADO. DIGITE A SENHA:");
+            if (pass === "th") {
+                alert("ACESSO MASTER CONCEDIDO!");
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('login-screen').style.display = 'none';
+            } else {
+                alert("SENHA INCORRETA!");
+            }
+        }
+
+        function criarNovaKey() {
+            const dias = parseInt(document.getElementById('key-time').value);
+            const expira = new Date().getTime() + (dias * 24 * 60 * 60 * 1000);
+            
+            // Gera uma string aleatória para ser a Key
+            const novaKey = "TH-SENSI-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+            
+            // Salva no banco local do navegador (LocalStorage)
+            localStorage.setItem(novaKey, expira);
+
+            const display = document.getElementById('show-new-key');
+            display.style.display = 'block';
+            display.innerText = "KEY GERADA: " + novaKey;
+        }
+
+        // --- SISTEMA DO USUÁRIO ---
+        function verificarAcesso() {
+            const keyDigitada = document.getElementById('user-key').value;
+            const validade = localStorage.getItem(keyDigitada);
+
+            if (validade) {
+                if (new Date().getTime() < parseInt(validade)) {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('sensi-result').style.display = 'block';
+                } else {
+                    alert("ESTA KEY JÁ EXPIROU!");
+                }
+            } else {
+                alert("KEY INVÁLIDA OU NÃO EXISTE!");
+            }
+        }
+
+        function gerarNovaSensi() {
+            const g = Math.floor(Math.random() * (200 - 85) + 85);
+            const r = Math.floor(Math.random() * (200 - 90) + 90);
+            const m2 = Math.floor(Math.random() * (200 - 80) + 80);
+            const m4 = Math.floor(Math.random() * (100 - 75) + 75);
+            const dpi = [411, 441, 480, 520, 580, 600, 720, 800, 960, 980, 990][Math.floor(Math.random() * 9)];
+
+            document.getElementById('display-sensi').innerHTML = `
+                GERAL: ${g}<br>
+                RED DOT: ${r}<br>
+                MIRA 2X: ${m2}<br>
+                MIRA 4X: ${m4}<br>
+                DPI: ${dpi}
+            `;
+        }
+    </script>
+</body>
+</html>
